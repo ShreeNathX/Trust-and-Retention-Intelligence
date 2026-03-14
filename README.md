@@ -75,7 +75,7 @@ TRUST AND RETENTION INTELLIGENCE/
 
 ---
 
-## Pipeline — Model.ipynb
+## Pipeline - Model.ipynb
 
 The notebook is structured in 10 sequential blocks:
 
