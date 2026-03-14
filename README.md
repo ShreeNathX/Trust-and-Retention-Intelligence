@@ -12,8 +12,6 @@ The application is deployed on Streamlit Community Cloud and available at:
 https://trust-and-retention-intelligence.streamlit.app
 ```
 
-Replace `YOUR_USERNAME` with your GitHub username after deployment.
-
 ---
 
 ## Project Overview
@@ -173,7 +171,7 @@ Displays model accuracy metrics, a comparison table of all three models, dataset
 **Step 1 — Clone the repository**
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/fintech-churn-app.git
+git clone https://github.com/ShreeNathX/Trust-and-Retention-Intelligence.git
 cd fintech-churn-app
 ```
 
@@ -203,7 +201,7 @@ The app opens at `http://localhost:8501`
 2. Go to share.streamlit.io
 3. Sign in with GitHub
 4. Click New App
-5. Set Repository to `YOUR_USERNAME/fintech-churn-app`, Branch to `main`, and Main file to `app.py`
+5. Set Repository to `https://github.com/ShreeNathX/Trust-and-Retention-Intelligence`, Branch to `main`, and Main file to `app.py`
 6. Click Deploy
 
 ---
@@ -241,5 +239,8 @@ Based on the model performance on the test set, using an assumed annual customer
 ---
 
 ## Author
+**Shree Nath Mahato (Leader)**  
+📧 Contact: [shreenath.ventures17@gmail.com](mailto:shreenath.ventures17@gmail.com).<br>
+💬  For any queries, suggestions, or collaborations, feel free to reach out via email.
 
 Built as a portfolio project demonstrating end-to-end data science skills including data engineering, exploratory analysis, machine learning, model explainability, and production deployment.
