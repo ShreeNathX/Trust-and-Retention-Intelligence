@@ -9,7 +9,7 @@ An end-to-end machine learning system for real-time customer churn prediction an
 The application is deployed on Streamlit Community Cloud and available at:
 
 ```
-https://YOUR_USERNAME-fintech-churn-app.streamlit.app
+https://trust-and-retention-intelligence.streamlit.app
 ```
 
 Replace `YOUR_USERNAME` with your GitHub username after deployment.
