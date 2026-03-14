@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+predictions_log.db
+.ipynb_checkpoints/
+.DS_Store
