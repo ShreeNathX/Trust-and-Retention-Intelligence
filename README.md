@@ -168,24 +168,24 @@ Displays model accuracy metrics, a comparison table of all three models, dataset
 
 ## How to Run Locally
 
-**Step 1 — Clone the repository**
+**Step 1 - Clone the repository**
 
 ```bash
 git clone https://github.com/ShreeNathX/Trust-and-Retention-Intelligence.git
 cd fintech-churn-app
 ```
 
-**Step 2 — Install dependencies**
+**Step 2 - Install dependencies**
 
 ```bash
 pip install streamlit pandas numpy joblib scikit-learn xgboost
 ```
 
-**Step 3 — Run the pipeline notebook**
+**Step 3 - Run the pipeline notebook**
 
 Open `Model.ipynb` in Jupyter and run all cells. This generates the three model files inside the `models/` folder.
 
-**Step 4 — Launch the app**
+**Step 4 - Launch the app**
 
 ```bash
 streamlit run app.py
