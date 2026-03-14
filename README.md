@@ -36,9 +36,9 @@ Financial institutions lose significant revenue to customer churn. This project 
 
 | Dataset | Source | Rows | Purpose |
 |---|---|---|---|
-| BankChurners.csv | Kaggle — Credit Card Customers | 10,127 | Primary churn model |
-| Churn_Modelling.csv | Kaggle — Predicting Churn for Bank Customers | 10,000 | Supporting analysis |
-| german_credit_data.csv | Kaggle — German Credit | 1,000 | Credit risk analysis |
+| BankChurners.csv | Kaggle - Credit Card Customers | 10,127 | Primary churn model |
+| Churn_Modelling.csv | Kaggle - Predicting Churn for Bank Customers | 10,000 | Supporting analysis |
+| german_credit_data.csv | Kaggle - German Credit | 1,000 | Credit risk analysis |
 
 Dataset sources:
 
@@ -82,15 +82,15 @@ The notebook is structured in 10 sequential blocks:
 | Block | Description |
 |---|---|
 | Block 1 | Load and inspect all three datasets |
-| Block 2 | Data cleaning — nulls, duplicates, encoding targets |
-| Block 3 | Feature engineering — 5 new business-driven features |
-| Block 4 | Exploratory data analysis — 7 visualizations |
-| Block 5 | Hypothesis validation — 5 business hypotheses tested |
-| Block 6 | Preprocessing — label encoding, train/test split, StandardScaler, SMOTE |
-| Block 7 | Model training — Logistic Regression, Random Forest, XGBoost with GridSearchCV |
-| Block 8 | Model evaluation — confusion matrix, ROC curves, classification report |
-| Block 9 | SHAP explainability — summary plots, beeswarm plots, waterfall charts for all 3 models |
-| Block 10 | Business impact report — financial value in INR, actionable recommendations |
+| Block 2 | Data cleaning - nulls, duplicates, encoding targets |
+| Block 3 | Feature engineering - 5 new business-driven features |
+| Block 4 | Exploratory data analysis - 7 visualizations |
+| Block 5 | Hypothesis validation - 5 business hypotheses tested |
+| Block 6 | Preprocessing - label encoding, train/test split, StandardScaler, SMOTE |
+| Block 7 | Model training - Logistic Regression, Random Forest, XGBoost with GridSearchCV |
+| Block 8 | Model evaluation - confusion matrix, ROC curves, classification report |
+| Block 9 | SHAP explainability - summary plots, beeswarm plots, waterfall charts for all 3 models |
+| Block 10 | Business impact report - financial value in INR, actionable recommendations |
 
 ---
 
@@ -101,8 +101,8 @@ Five new features were created from raw data to capture customer behaviour signa
 | Feature | Description |
 |---|---|
 | engagement_score | Weighted score combining transaction count, relationship count, and inactivity months |
-| txn_decline_flag | Binary flag — 1 if spending declined more than 30% from Q1 to Q4 |
-| high_contact_flag | Binary flag — 1 if customer contacted support 3 or more times in 12 months |
+| txn_decline_flag | Binary flag - 1 if spending declined more than 30% from Q1 to Q4 |
+| high_contact_flag | Binary flag - 1 if customer contacted support 3 or more times in 12 months |
 | revolving_ratio | Ratio of revolving balance to credit limit |
 | utilization_bucket | Ordinal encoding of credit utilization into 4 bands |
 
@@ -136,11 +136,11 @@ XGBoost was selected as the production model based on highest AUC and F1 scores.
 
 ## Techniques Applied
 
-- SMOTE — oversampling to handle 84/16 class imbalance in training data
-- Stratified K-Fold Cross Validation — 5 folds, prevents data leakage
-- GridSearchCV — exhaustive hyperparameter tuning for XGBoost
-- SHAP (SHapley Additive exPlanations) — model explainability for all three models
-- StandardScaler — feature scaling applied consistently across train and test sets
+- SMOTE - oversampling to handle 84/16 class imbalance in training data
+- Stratified K-Fold Cross Validation - 5 folds, prevents data leakage
+- GridSearchCV - exhaustive hyperparameter tuning for XGBoost
+- SHAP (SHapley Additive exPlanations) - model explainability for all three models
+- StandardScaler - feature scaling applied consistently across train and test sets
 
 ---
 
@@ -153,9 +153,9 @@ The Streamlit app provides two tabs:
 Enter customer details across three sections — Identity, Profile, and Relationship — along with financial details including credit, transaction data, and utilization ratio. The app returns:
 
 - Churn probability as a percentage
-- Binary prediction — Will Churn or Will Stay
+- Binary prediction - Will Churn or Will Stay
 - Confidence score
-- Risk level — CRITICAL, HIGH, MEDIUM, or LOW
+- Risk level - CRITICAL, HIGH, MEDIUM, or LOW
 - Colour-coded probability gauge
 - Actionable business recommendation
 - Risk signals detected from input values
