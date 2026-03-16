@@ -2,7 +2,7 @@
 # FINTECH TRUST & RETENTION INTELLIGENCE — STREAMLIT GUI
 # ============================================================
 # HOW TO RUN:
-#   streamlit run app.p
+#   streamlit run app.py
 #
 # REQUIRED FILES:
 #   models/churn_model.pkl
