@@ -309,7 +309,7 @@ with tab1:
     with col1:
         st.markdown('<div class="sub-label">Identity</div>',
                     unsafe_allow_html=True)
-        customer_id = st.text_input("Customer ID",  value="CUST_001")
+        customer_id = st.text_input("Customer ID",  value="Customer Name")
         age         = st.number_input("Age",
                                        min_value=18, max_value=100, value=45)
         gender      = st.selectbox("Gender", ["Male", "Female"])
