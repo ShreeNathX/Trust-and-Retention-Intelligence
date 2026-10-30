@@ -111,6 +111,10 @@ From the project folder, open `Model.ipynb` in JupyterLab and run all cells from
 
     streamlit run app.py
 
+Run the saved-artifact checks without retraining with:
+
+    python -m unittest discover -s tests -v
+
 Streamlit loads the model and feature schema saved by the notebook. If the artifact is missing, run the notebook first.
 
 ## Project files
@@ -124,6 +128,8 @@ Streamlit loads the model and feature schema saved by the notebook. If the artif
 | `outputs/` | EDA, benchmark, holdout, subgroup, and feature-importance reports |
 | `requirements.txt` | Pinned runtime dependencies for the Streamlit app |
 | `requirements-dev.txt` | Runtime dependencies plus notebook and plotting tools |
+| `tests/` | Checks for model inference and benchmark artifact consistency |
+| `.github/workflows/checks.yml` | Runs the artifact checks on pushes and pull requests |
 | `CONTRIBUTING.md` | Contribution workflow and review expectations |
 
 The notebook creates `outputs/data_audit.json`, EDA tables and figures, `outputs/benchmark.csv`, `outputs/test_metrics.json`, `outputs/subgroup_audit.csv`, `outputs/feature_importance.csv`, and `outputs/holdout_precision_recall.png`.

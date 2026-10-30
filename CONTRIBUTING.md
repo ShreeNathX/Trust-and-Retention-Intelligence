@@ -15,7 +15,8 @@ Issues and pull requests are welcome.
 
 1. Install notebook and development dependencies with `python -m pip install -r requirements-dev.txt`.
 2. Run every cell in `Model.ipynb` from the project folder.
-3. Start the app with `streamlit run app.py` and confirm the scoring and benchmark tabs load.
-4. Summarize changes and any benchmark movement in the pull request.
+3. Run `python -m unittest discover -s tests -v` to check the saved model and reports.
+4. Start the app with `streamlit run app.py` and confirm the scoring and benchmark tabs load.
+5. Summarize changes and any benchmark movement in the pull request.
 
 The public dataset has no observation date or future churn horizon. Contributions must not present its scores as validated future-churn or bank-specific performance.
