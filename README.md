@@ -68,7 +68,7 @@ Create one row per eligible customer per scoring date. Every predictor must be a
 - **Holdout discipline:** compare candidates using training cross-validation only. Evaluate the calibrated selected model once on the locked holdout; do not use holdout scores to rank or revise candidates.
 - **Leakage control:** imputing, scaling, and one-hot encoding are inside each model pipeline and fitted within each training fold.
 - **Evaluation:** report AP, ROC-AUC, Brier score, F1, precision, recall, balanced accuracy, confusion counts, and a bootstrap 95% interval for holdout AP. Also report subgroup diagnostics and validation-set permutation importance.
-- **Public benchmark pass rule:** the selected model must beat the Dummy baseline on CV AP, and the lower bound of the holdout AP bootstrap interval must exceed holdout prevalence. Passing applies only to this static dataset and split.
+- **Static benchmark screen:** the selected model must beat the Dummy baseline on CV AP, the lower bound of the holdout AP bootstrap interval must exceed holdout prevalence, and holdout Brier score must beat a constant training-prevalence prediction. This screen applies only to this static dataset and split; it is not evidence of temporal or cross-bank performance.
 
 ## Benchmark results
 
@@ -86,6 +86,7 @@ The current benchmark selected Histogram Gradient Boosting by mean cross-validat
 | Average precision | 0.959 (95% bootstrap interval 0.942–0.973) |
 | ROC-AUC | 0.991 |
 | Brier score | 0.025 |
+| Training-prevalence baseline Brier score | 0.135 |
 | F1 | 0.892 |
 | Precision | 0.871 |
 | Recall | 0.914 |
@@ -93,7 +94,7 @@ The current benchmark selected Histogram Gradient Boosting by mean cross-validat
 | Validation-selected F1 threshold | 0.337 |
 | Confusion counts | TN 1,657; FP 44; FN 28; TP 297 |
 
-These strong scores are not proof of future prediction: the data label existing attrition status and have no timestamps or forecast horizon. The threshold is not a bank-approved outreach decision rule. The project does not claim revenue saved or causal retention impact. The reported bootstrap interval describes uncertainty on this holdout only, not across time, banks, or populations.
+The static benchmark screen was met on this public static-label split. These scores are not proof of future prediction: the data label existing attrition status and have no timestamps or forecast horizon. The threshold is not a bank-approved outreach decision rule. The project does not claim revenue saved or causal retention impact. The reported bootstrap interval describes uncertainty on this holdout only, not across time, banks, or populations.
 
 The notebook displays the benchmark table and evaluation metrics when run and writes `outputs/benchmark.csv` and `outputs/test_metrics.json`. Re-run it after changing the input data or methodology; update the table here from that run before reporting new results.
 

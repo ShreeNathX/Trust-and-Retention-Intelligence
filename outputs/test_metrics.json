@@ -27,6 +27,12 @@
   "false_positives": 44,
   "false_negatives": 28,
   "true_positives": 297,
-  "public_benchmark_pass": true,
-  "interpretation": "Public static-label benchmark only; no observation date or future churn horizon."
+  "interpretation": "Static-label benchmark screen only; no observation date or future churn horizon.",
+  "holdout_training_prevalence_baseline_brier_score": 0.13468182239666865,
+  "static_benchmark_screen_pass": true,
+  "static_benchmark_screen_criteria": [
+    "CV AP exceeds the training-fold Dummy baseline",
+    "Holdout AP bootstrap lower bound exceeds holdout prevalence",
+    "Holdout Brier score beats the training-prevalence-only baseline"
+  ]
 }
