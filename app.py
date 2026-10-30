@@ -172,9 +172,13 @@ with benchmark_tab:
     if BENCHMARK_PATH.exists():
         benchmark = load_table(*file_signature(BENCHMARK_PATH))
         st.bar_chart(
-            benchmark.set_index("model")["holdout_average_precision"],
-            y_label="Average precision",
-            alt="Holdout average precision by model",
+            benchmark.set_index("model")["cv_average_precision_mean"],
+            y_label="Cross-validated average precision",
+            alt="Mean five-fold cross-validated average precision by model",
+        )
+        st.caption(
+            "Candidates are compared on training cross-validation. The locked holdout "
+            "above is evaluated once for the selected calibrated model."
         )
         st.dataframe(
             benchmark,

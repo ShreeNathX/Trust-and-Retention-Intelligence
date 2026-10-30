@@ -63,20 +63,21 @@ Create one row per eligible customer per scoring date. Every predictor must be a
 - **Primary selection metric:** five-fold stratified cross-validated average precision (AP), appropriate for the 16.1% minority class.
 - **Models:** Logistic Regression, Random Forest, and Histogram Gradient Boosting, compared with a prevalence-only Dummy baseline.
 - **Partitions:** stratified 60% training, 20% validation, and 20% locked holdout. Tuning uses training folds only; validation selects the F1 threshold; the holdout is reserved for final reporting.
+- **Holdout discipline:** compare candidates using training cross-validation only. Evaluate the calibrated selected model once on the locked holdout; do not use holdout scores to rank or revise candidates.
 - **Leakage control:** imputing, scaling, and one-hot encoding are inside each model pipeline and fitted within each training fold.
 - **Evaluation:** report AP, ROC-AUC, Brier score, F1, precision, recall, balanced accuracy, confusion counts, and a bootstrap 95% interval for holdout AP. Also report subgroup diagnostics and validation-set permutation importance.
 - **Public benchmark pass rule:** the selected model must beat the Dummy baseline on CV AP, and the lower bound of the holdout AP bootstrap interval must exceed holdout prevalence. Passing applies only to this static dataset and split.
 
 ## Benchmark results
 
-The current benchmark selected Histogram Gradient Boosting by mean cross-validated AP. Candidate holdout scores below are uncalibrated, for comparison; final selected-model metrics are from the calibrated model at a threshold chosen on validation data.
+The current benchmark selected Histogram Gradient Boosting by mean cross-validated AP. Candidate models are compared on training cross-validation only. The locked holdout metrics below are from the selected calibrated model, evaluated once at a threshold chosen on validation data.
 
-| Model | CV AP mean ± SD | Holdout AP | Holdout ROC-AUC |
-|---|---:|---:|---:|
-| Dummy baseline | 0.161 ± 0.000 | 0.160 | 0.500 |
-| Logistic Regression | 0.737 ± 0.025 | 0.719 | 0.917 |
-| Random Forest | 0.933 ± 0.019 | 0.927 | 0.982 |
-| Histogram Gradient Boosting | **0.969 ± 0.007** | **0.957** | **0.990** |
+| Model | 5-fold CV AP mean ± SD | Selected |
+|---|---:|:---:|
+| Dummy baseline | 0.161 ± 0.000 | No |
+| Logistic Regression | 0.737 ± 0.025 | No |
+| Random Forest | 0.933 ± 0.019 | No |
+| Histogram Gradient Boosting | **0.969 ± 0.007** | **Yes** |
 
 | Selected calibrated model metric | Locked holdout |
 |---|---:|
