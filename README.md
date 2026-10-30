@@ -138,6 +138,10 @@ The notebook creates `outputs/data_audit.json`, EDA tables and figures, `outputs
 
 Obtain approved dated bank data and define churn consistently; create time-based and customer-grouped validation; evaluate calibration, outreach-capacity precision/recall, subgroup behavior, and drift; run a randomized offer/control pilot; and set decisions using customer value, offer cost, capacity, and measured treatment effects. Privacy, security, compliance, and model-governance owners must approve the intended use.
 
+## Model artifact security
+
+The app loads the checked-in `models/churn_pipeline.joblib` artifact with `joblib`. This pickle-based format can execute code when loaded, so use only artifacts produced from reviewed project code. The app does not accept model uploads.
+
 ## Contributing
 
 Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and checks expected for changes. Never commit private customer data, credentials, environment folders, or notebook checkpoints. Model changes should preserve the training-only selection and locked holdout method, rerun the notebook, and update the benchmark results here.
