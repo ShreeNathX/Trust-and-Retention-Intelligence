@@ -27,5 +27,75 @@
   "attrited_customers": 1627,
   "attrition_rate": 0.1606596227905599,
   "has_observation_date": false,
-  "has_churn_event_date": false
+  "has_churn_event_date": false,
+  "training_input_ranges": {
+    "Months_on_book": {
+      "min": 13.0,
+      "median": 36.0,
+      "max": 56.0
+    },
+    "Total_Relationship_Count": {
+      "min": 1.0,
+      "median": 4.0,
+      "max": 6.0
+    },
+    "Months_Inactive_12_mon": {
+      "min": 0.0,
+      "median": 2.0,
+      "max": 6.0
+    },
+    "Contacts_Count_12_mon": {
+      "min": 0.0,
+      "median": 2.0,
+      "max": 6.0
+    },
+    "Credit_Limit": {
+      "min": 1438.3,
+      "median": 4533.0,
+      "max": 34516.0
+    },
+    "Total_Revolving_Bal": {
+      "min": 0.0,
+      "median": 1285.0,
+      "max": 2517.0
+    },
+    "Avg_Open_To_Buy": {
+      "min": 39.0,
+      "median": 3489.0,
+      "max": 34516.0
+    },
+    "Total_Amt_Chng_Q4_Q1": {
+      "min": 0.0,
+      "median": 0.733,
+      "max": 3.355
+    },
+    "Total_Trans_Amt": {
+      "min": 530.0,
+      "median": 3895.0,
+      "max": 17995.0
+    },
+    "Total_Trans_Ct": {
+      "min": 10.0,
+      "median": 67.0,
+      "max": 139.0
+    },
+    "Total_Ct_Chng_Q4_Q1": {
+      "min": 0.0,
+      "median": 0.702,
+      "max": 3.714
+    },
+    "Avg_Utilization_Ratio": {
+      "min": 0.0,
+      "median": 0.176,
+      "max": 0.984
+    }
+  },
+  "training_categories": {
+    "Card_Category": [
+      "Blue",
+      "Gold",
+      "Platinum",
+      "Silver"
+    ]
+  }
 }

@@ -41,6 +41,8 @@ The model predicts the supplied `Attrition_Flag` label using these fields:
 
 The app derives available credit as credit limit minus revolving balance and rounds utilization to the three decimal places used in the source data. `Attrition_Flag` is the label (Existing Customer = 0; Attrited Customer = 1), not a model input. Age and gender are audit-only. The model does not use customer ID or the two target-derived Naive Bayes output columns.
 
+The notebook records numeric input ranges and categorical values from the training partition in `outputs/data_audit.json`. Streamlit uses these to set the scoring form's limits and defaults. A calculated open-to-buy or utilization value outside the training range is not scored.
+
 No included public file is sufficient to validate future churn performance for a real bank. A production study needs institution-approved longitudinal snapshots with a defined future label such as `churn_90d`, account and product status, dated transactions, engagement and service history, and closure events. Customer IDs must remain out of predictors, and repeated customers must not cross time-based train and test partitions. Campaign assignment, offer response, intervention cost, and customer contribution margin are needed to evaluate business impact; a randomized retention pilot is needed to establish causal benefit.
 
 ### Fields required for a real-world dataset

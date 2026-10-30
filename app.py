@@ -18,6 +18,33 @@ st.caption(
     "horizon, so scores are not validated predictions for a real bank."
 )
 
+if not AUDIT_PATH.exists():
+    st.error("Training input ranges are missing. Run all cells in Model.ipynb first.")
+    st.stop()
+
+with AUDIT_PATH.open(encoding="utf-8") as file:
+    data_audit = json.load(file)
+
+training_ranges = data_audit.get("training_input_ranges", {})
+training_categories = data_audit.get("training_categories", {})
+if not training_ranges or not training_categories.get("Card_Category"):
+    st.error("Training input metadata is incomplete. Run all cells in Model.ipynb first.")
+    st.stop()
+
+
+def numeric_input(label, feature, step=1, integer=False):
+    stats = training_ranges[feature]
+    if integer:
+        minimum, maximum = int(stats["min"]), int(stats["max"])
+        value = int(round(stats["median"]))
+    else:
+        minimum, maximum = float(stats["min"]), float(stats["max"])
+        value = float(stats["median"])
+    value = min(max(value, minimum), maximum)
+    return st.number_input(
+        label, min_value=minimum, max_value=maximum, value=value, step=step
+    )
+
 
 def file_signature(path):
     stat = path.stat()
@@ -41,6 +68,15 @@ if not MODEL_PATH.exists():
     st.stop()
 
 artifact = load_artifact(*file_signature(MODEL_PATH))
+missing_metadata = (
+    set(artifact["feature_columns"])
+    - set(training_ranges)
+    - set(training_categories)
+)
+if missing_metadata:
+    st.error("Training input metadata is missing model fields. Run all cells in Model.ipynb.")
+    st.stop()
+
 model = artifact["model"]
 threshold = float(artifact["threshold"])
 
@@ -49,62 +85,42 @@ predict_tab, benchmark_tab = st.tabs(["Score a benchmark profile", "Benchmark re
 with predict_tab:
     st.subheader("Account and activity details")
     with st.form("profile"):
+        st.caption("Input ranges and default values come from the notebook training split.")
         left, middle, right = st.columns(3)
         with left:
-            card = st.selectbox(
-                "Card category", ["Blue", "Silver", "Gold", "Platinum"]
+            card = st.selectbox("Card category", training_categories["Card_Category"])
+            months_on_book = numeric_input(
+                "Months on book", "Months_on_book", integer=True
             )
-            months_on_book = st.number_input(
-                "Months on book", min_value=13, max_value=56, value=36
+            relationships = numeric_input(
+                "Total relationships", "Total_Relationship_Count", integer=True
             )
-            relationships = st.number_input(
-                "Total relationships", min_value=1, max_value=6, value=4
-            )
-            inactive_months = st.number_input(
-                "Months inactive in the last year", min_value=0, max_value=6, value=2
+            inactive_months = numeric_input(
+                "Months inactive in the last year", "Months_Inactive_12_mon",
+                integer=True,
             )
         with middle:
-            contacts = st.number_input(
-                "Contacts in the last year", min_value=0, max_value=6, value=2
+            contacts = numeric_input(
+                "Contacts in the last year", "Contacts_Count_12_mon", integer=True
             )
-            credit_limit = st.number_input(
-                "Credit limit",
-                min_value=1438.3,
-                max_value=34516.0,
-                value=4549.0,
-                step=100.0,
+            credit_limit = numeric_input("Credit limit", "Credit_Limit", step=100.0)
+            revolving_balance = numeric_input(
+                "Revolving balance", "Total_Revolving_Bal", step=100.0
             )
-            revolving_balance = st.number_input(
-                "Revolving balance",
-                min_value=0.0,
-                max_value=2517.0,
-                value=1276.0,
-                step=100.0,
-            )
-            amount_change = st.number_input(
+            amount_change = numeric_input(
                 "Transaction amount change (Q4/Q1)",
-                min_value=0.0,
-                max_value=3.397,
-                value=0.736,
-                step=0.01,
+                "Total_Amt_Chng_Q4_Q1", step=0.01,
             )
         with right:
-            transaction_amount = st.number_input(
-                "Transaction amount",
-                min_value=510,
-                max_value=18484,
-                value=3899,
-                step=100,
+            transaction_amount = numeric_input(
+                "Transaction amount", "Total_Trans_Amt", step=100, integer=True
             )
-            transaction_count = st.number_input(
-                "Transaction count", min_value=10, max_value=139, value=67
+            transaction_count = numeric_input(
+                "Transaction count", "Total_Trans_Ct", integer=True
             )
-            count_change = st.number_input(
+            count_change = numeric_input(
                 "Transaction count change (Q4/Q1)",
-                min_value=0.0,
-                max_value=3.714,
-                value=0.702,
-                step=0.01,
+                "Total_Ct_Chng_Q4_Q1", step=0.01,
             )
             open_to_buy = credit_limit - revolving_balance
             utilization = round(revolving_balance / credit_limit, 3)
@@ -118,6 +134,17 @@ with predict_tab:
             st.error(
                 "Revolving balance must be below the credit limit, leaving at least "
                 "3 units open to buy."
+            )
+        elif any(
+            not training_ranges[feature]["min"] <= value <= training_ranges[feature]["max"]
+            for feature, value in {
+                "Avg_Open_To_Buy": open_to_buy,
+                "Avg_Utilization_Ratio": utilization,
+            }.items()
+        ):
+            st.error(
+                "The calculated open-to-buy or utilization value is outside the "
+                "notebook training range, so this profile cannot be scored."
             )
         else:
             row = pd.DataFrame(
@@ -187,17 +214,14 @@ with benchmark_tab:
         )
 
     st.subheader("Data and subgroup checks")
-    if AUDIT_PATH.exists():
-        with AUDIT_PATH.open(encoding="utf-8") as file:
-            data_audit = json.load(file)
-        st.write(
-            f"Rows after cleaning: {data_audit['rows_after_cleaning']:,}; "
-            f"missing predictor values: "
-            f"{data_audit['missing_predictor_values_after_cleaning']:,}; "
-            f"duplicate rows removed: {data_audit['duplicate_rows_removed']:,}; "
-            f"source attrition rate: {data_audit['attrition_rate']:.1%}; "
-            f"holdout rows: {metrics['holdout_rows']:,}."
-        )
+    st.write(
+        f"Rows after cleaning: {data_audit['rows_after_cleaning']:,}; "
+        f"missing predictor values: "
+        f"{data_audit['missing_predictor_values_after_cleaning']:,}; "
+        f"duplicate rows removed: {data_audit['duplicate_rows_removed']:,}; "
+        f"source attrition rate: {data_audit['attrition_rate']:.1%}; "
+        f"holdout rows: {metrics['holdout_rows']:,}."
+    )
     if SUBGROUP_PATH.exists():
         st.dataframe(
             load_table(*file_signature(SUBGROUP_PATH)),
