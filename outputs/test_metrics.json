@@ -1,0 +1,32 @@
+{
+  "selection_metric": "5-fold cross-validated average precision",
+  "selected_model": "HistGradientBoosting",
+  "best_parameters": {
+    "model__learning_rate": 0.1,
+    "model__max_iter": 240,
+    "model__max_leaf_nodes": 15
+  },
+  "cv_average_precision_mean": 0.9687199109862273,
+  "cv_average_precision_std": 0.006751208893291864,
+  "validation_threshold": 0.3365972779433303,
+  "threshold_rule": "F1 maximized on the separate validation split",
+  "holdout_rows": 2026,
+  "holdout_attrition_rate": 0.16041461006910168,
+  "holdout_average_precision": 0.958890752314318,
+  "holdout_average_precision_95pct_bootstrap_ci": [
+    0.9421478786142115,
+    0.9729304297893238
+  ],
+  "holdout_roc_auc": 0.9906263284041061,
+  "holdout_brier_score": 0.02528007941325116,
+  "holdout_f1": 0.8918918918918919,
+  "holdout_precision": 0.8709677419354839,
+  "holdout_recall": 0.9138461538461539,
+  "holdout_balanced_accuracy": 0.9439895084339529,
+  "true_negatives": 1657,
+  "false_positives": 44,
+  "false_negatives": 28,
+  "true_positives": 297,
+  "public_benchmark_pass": true,
+  "interpretation": "Public static-label benchmark only; no observation date or future churn horizon."
+}
