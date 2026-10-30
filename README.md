@@ -1,246 +1,130 @@
-# FinTech Trust and Retention Intelligence
+# Trust and Retention Intelligence
 
-An end-to-end machine learning system for real-time customer churn prediction and credit risk scoring in the financial services domain. The project covers the full data science lifecycle from raw data to a deployed web application.
+A reproducible customer attrition benchmark for the public BankChurners dataset. The Jupyter notebook is the single source for data checks, cleaning, EDA, preprocessing, model training, evaluation, and the model artifact loaded by Streamlit.
 
----
+**Status:** research benchmark and demonstration app. The public data contain no observation date, churn-event date, or future prediction horizon. Results do not establish future churn prediction or bank-specific performance.
 
-## Live Demo
+## Research reviewed
 
-The application is deployed on Streamlit Community Cloud and available at:
+- Brito et al. (2024), [A framework to improve churn prediction performance in retail banking](https://link.springer.com/article/10.1186/s40854-023-00558-3). The study uses 36 months of data from more than 3 million customers and about 170 million transactions at one bank. It motivates time-aware behavior features and minority-class evaluation; the bank data are private.
+- [Calibrated, cost-sensitive, explainable ensemble learning for customer churn prediction in retail banking](https://pmc.ncbi.nlm.nih.gov/articles/PMC13627369/) (2026). This public-data study demonstrates leakage-safe preprocessing, model comparison, calibration, and threshold selection. Its static dataset also limits temporal claims.
 
-```
-https://trust-and-retention-intelligence.streamlit.app
-```
+These papers inform the workflow, but their data and results are not transferable to this project.
 
----
+## Data and cleaning
 
-## Project Overview
+The included `Data/BankChurners.csv` file comes from Sakshi Goyal's [Credit Card customers dataset on Kaggle](https://www.kaggle.com/datasets/sakshigoyal7/credit-card-customers). The Kaggle dataset page lists the data as CC0: Public Domain. It has 10,127 rows, 8,500 existing customers, and 1,627 attrited customers (16.1%). In this copy, the data contain no missing cells or duplicate rows. The notebook validates the schema and target, removes exact duplicate rows and rows without a target, converts numeric fields safely, and leaves any missing predictors to fold-fitted imputers.
 
-Financial institutions lose significant revenue to customer churn. This project builds a production-grade churn prediction system using three real-world datasets, trained with industry-standard techniques, and deployed as an interactive web application.
+Only 13 account and activity fields enter the model. `CLIENTNUM` and the two Naive Bayes output columns are excluded. Age and gender are reserved for subgroup audits. The other available public datasets do not provide a compatible dated churn outcome, so they are not used as external validation. **The German credit dataset is not used:** it describes credit risk rather than customer attrition and has no churn outcome. It was removed from the project; the only current input is `BankChurners.csv`.
 
-| Item | Detail |
+### Current benchmark model inputs
+
+The model predicts the supplied `Attrition_Flag` label using these fields:
+
+| Field | Meaning |
 |---|---|
-| Primary target | Customer churn (binary classification) |
-| Secondary target | Credit risk scoring |
-| Best model | XGBoost |
-| Accuracy | 96.8% |
-| AUC Score | 0.992 |
-| F1 Score | 0.898 |
-| Recall | 0.883 |
-| Training rows | 10,127 |
-| Features used | 24 (19 original + 5 engineered) |
+| `Months_on_book` | Customer tenure on the account |
+| `Total_Relationship_Count` | Number of products/relationships |
+| `Months_Inactive_12_mon` | Inactive months in the last 12 months |
+| `Contacts_Count_12_mon` | Customer-service contacts in the last 12 months |
+| `Credit_Limit` | Credit limit |
+| `Total_Revolving_Bal` | Revolving balance |
+| `Avg_Open_To_Buy` | Available credit amount |
+| `Total_Amt_Chng_Q4_Q1` | Transaction amount change, Q4 relative to Q1 |
+| `Total_Trans_Amt` | Total transaction amount |
+| `Total_Trans_Ct` | Transaction count |
+| `Total_Ct_Chng_Q4_Q1` | Transaction-count change, Q4 relative to Q1 |
+| `Avg_Utilization_Ratio` | Credit utilization ratio |
+| `Card_Category` | Card product category |
 
----
+The app derives available credit as credit limit minus revolving balance and rounds utilization to the three decimal places used in the source data. `Attrition_Flag` is the label (Existing Customer = 0; Attrited Customer = 1), not a model input. Age and gender are audit-only. The model does not use customer ID or the two target-derived Naive Bayes output columns.
 
-## Datasets
+No included public file is sufficient to validate future churn performance for a real bank. A production study needs institution-approved longitudinal snapshots with a defined future label such as `churn_90d`, account and product status, dated transactions, engagement and service history, and closure events. Customer IDs must remain out of predictors, and repeated customers must not cross time-based train and test partitions. Campaign assignment, offer response, intervention cost, and customer contribution margin are needed to evaluate business impact; a randomized retention pilot is needed to establish causal benefit.
 
-| Dataset | Source | Rows | Purpose |
-|---|---|---|---|
-| BankChurners.csv | Kaggle - Credit Card Customers | 10,127 | Primary churn model |
-| Churn_Modelling.csv | Kaggle - Predicting Churn for Bank Customers | 10,000 | Supporting analysis |
-| german_credit_data.csv | Kaggle - German Credit | 1,000 | Credit risk analysis |
+### Fields required for a real-world dataset
 
-Dataset sources:
+Create one row per eligible customer per scoring date. Every predictor must be available on that date; label the row only from outcomes in a later fixed horizon.
 
-- https://www.kaggle.com/datasets/sakshigoyal7/credit-card-customers
-- https://www.kaggle.com/datasets/adammaus/predicting-churn-for-bank-customers
-- https://www.kaggle.com/datasets/uciml/german-credit
+| Field group | Fields to collect | Purpose |
+|---|---|---|
+| Keys and dates | Pseudonymous customer ID, snapshot date, account open date, product closure date/status | Join snapshots and define time splits and outcomes; never score on the ID |
+| Product relationship | Active products, product type, account status, tenure, balances | Describe relationship state at score time |
+| Transactions | Date, amount, product, channel, transaction type; derived recency, frequency, and monetary aggregates over trailing 30/90/180-day windows | Capture prior behavior without future information |
+| Engagement and service | Digital active days, last login, contacts, complaints, case outcomes and dates | Measure activity and service friction before scoring |
+| Retention activity | Contact/offer dates, randomized treatment or control assignment, offer type, response, campaign cost | Measure intervention outcomes and cost |
+| Customer value | Contribution margin or approved customer value and offer cost | Estimate net value rather than gross revenue |
+| Audit-only attributes | Approved age band, gender, and other protected-group fields | Review errors and outcomes by group; keep separate from model inputs unless approved |
+| Target | Churn event date and reproducible `churn_90d` label | Define the future outcome; never use it as an input |
 
----
+## Benchmark design
 
-## Folder Structure
+- **Primary selection metric:** five-fold stratified cross-validated average precision (AP), appropriate for the 16.1% minority class.
+- **Models:** Logistic Regression, Random Forest, and Histogram Gradient Boosting, compared with a prevalence-only Dummy baseline.
+- **Partitions:** stratified 60% training, 20% validation, and 20% locked holdout. Tuning uses training folds only; validation selects the F1 threshold; the holdout is reserved for final reporting.
+- **Leakage control:** imputing, scaling, and one-hot encoding are inside each model pipeline and fitted within each training fold.
+- **Evaluation:** report AP, ROC-AUC, Brier score, F1, precision, recall, balanced accuracy, confusion counts, and a bootstrap 95% interval for holdout AP. Also report subgroup diagnostics and validation-set permutation importance.
+- **Public benchmark pass rule:** the selected model must beat the Dummy baseline on CV AP, and the lower bound of the holdout AP bootstrap interval must exceed holdout prevalence. Passing applies only to this static dataset and split.
 
-```
-TRUST AND RETENTION INTELLIGENCE/
-│
-├── app.py                        # Streamlit web application
-├── requirements.txt              # Python dependencies
-├── .gitignore                    # Git ignore rules
-├── Model.ipynb                   # Full ML pipeline notebook
-├── Links of data.txt             # Dataset source links
-│
-├── Data/
-│   ├── BankChurners.csv
-│   ├── Churn_Modelling.csv
-│   └── german_credit_data.csv
-│
-├── models/
-│   ├── churn_model.pkl           # Trained XGBoost model
-│   ├── scaler.pkl                # StandardScaler
-│   └── feature_names.pkl         # Ordered feature list
-│
-└── outputs/
-    └── class_balance.png         # EDA output chart
-```
+## Benchmark results
 
----
+The current benchmark selected Histogram Gradient Boosting by mean cross-validated AP. Candidate holdout scores below are uncalibrated, for comparison; final selected-model metrics are from the calibrated model at a threshold chosen on validation data.
 
-## Pipeline - Model.ipynb
+| Model | CV AP mean ± SD | Holdout AP | Holdout ROC-AUC |
+|---|---:|---:|---:|
+| Dummy baseline | 0.161 ± 0.000 | 0.160 | 0.500 |
+| Logistic Regression | 0.737 ± 0.025 | 0.719 | 0.917 |
+| Random Forest | 0.933 ± 0.019 | 0.927 | 0.982 |
+| Histogram Gradient Boosting | **0.969 ± 0.007** | **0.957** | **0.990** |
 
-The notebook is structured in 10 sequential blocks:
+| Selected calibrated model metric | Locked holdout |
+|---|---:|
+| Average precision | 0.959 (95% bootstrap interval 0.942–0.973) |
+| ROC-AUC | 0.991 |
+| Brier score | 0.025 |
+| F1 | 0.892 |
+| Precision | 0.871 |
+| Recall | 0.914 |
+| Balanced accuracy | 0.944 |
+| Validation-selected F1 threshold | 0.337 |
+| Confusion counts | TN 1,657; FP 44; FN 28; TP 297 |
 
-| Block | Description |
+These strong scores are not proof of future prediction: the data label existing attrition status and have no timestamps or forecast horizon. The threshold is not a bank-approved outreach decision rule. The project does not claim revenue saved or causal retention impact. The reported bootstrap interval describes uncertainty on this holdout only, not across time, banks, or populations.
+
+The notebook displays the benchmark table and evaluation metrics when run and writes `outputs/benchmark.csv` and `outputs/test_metrics.json`. Re-run it after changing the input data or methodology; update the table here from that run before reporting new results.
+
+## Run the project
+
+Use Python 3.11 with the pinned application and notebook packages:
+
+    python -m pip install -r requirements.txt
+    jupyter lab
+
+From the project folder, open `Model.ipynb` in JupyterLab and run all cells from top to bottom. This fits the benchmark models and saves `models/churn_pipeline.joblib` plus the evaluation reports. Then start the app in a terminal:
+
+    streamlit run app.py
+
+Streamlit loads the model and feature schema saved by the notebook. If the artifact is missing, run the notebook first.
+
+## Project files
+
+| Path | Purpose |
 |---|---|
-| Block 1 | Load and inspect all three datasets |
-| Block 2 | Data cleaning - nulls, duplicates, encoding targets |
-| Block 3 | Feature engineering - 5 new business-driven features |
-| Block 4 | Exploratory data analysis - 7 visualizations |
-| Block 5 | Hypothesis validation - 5 business hypotheses tested |
-| Block 6 | Preprocessing - label encoding, train/test split, StandardScaler, SMOTE |
-| Block 7 | Model training - Logistic Regression, Random Forest, XGBoost with GridSearchCV |
-| Block 8 | Model evaluation - confusion matrix, ROC curves, classification report |
-| Block 9 | SHAP explainability - summary plots, beeswarm plots, waterfall charts for all 3 models |
-| Block 10 | Business impact report - financial value in INR, actionable recommendations |
+| `Model.ipynb` | Complete data-science workflow and benchmark; source of the fitted model |
+| `app.py` | Streamlit profile scorer and benchmark results view |
+| `Data/BankChurners.csv` | Public static-label benchmark data |
+| `models/churn_pipeline.joblib` | Notebook-produced calibrated model, feature list, threshold, and metrics |
+| `outputs/` | EDA, benchmark, holdout, subgroup, and feature-importance reports |
+| `requirements.txt` | Pinned application and model dependencies |
+| `CONTRIBUTING.md` | Contribution workflow and review expectations |
 
----
+The notebook creates `outputs/data_audit.json`, EDA tables and figures, `outputs/benchmark.csv`, `outputs/test_metrics.json`, `outputs/subgroup_audit.csv`, `outputs/feature_importance.csv`, and `outputs/holdout_precision_recall.png`.
 
-## Feature Engineering
+## Requirements before a real-world pilot
 
-Five new features were created from raw data to capture customer behaviour signals:
+Obtain approved dated bank data and define churn consistently; create time-based and customer-grouped validation; evaluate calibration, outreach-capacity precision/recall, subgroup behavior, and drift; run a randomized offer/control pilot; and set decisions using customer value, offer cost, capacity, and measured treatment effects. Privacy, security, compliance, and model-governance owners must approve the intended use.
 
-| Feature | Description |
-|---|---|
-| engagement_score | Weighted score combining transaction count, relationship count, and inactivity months |
-| txn_decline_flag | Binary flag - 1 if spending declined more than 30% from Q1 to Q4 |
-| high_contact_flag | Binary flag - 1 if customer contacted support 3 or more times in 12 months |
-| revolving_ratio | Ratio of revolving balance to credit limit |
-| utilization_bucket | Ordinal encoding of credit utilization into 4 bands |
+## Contributing
 
----
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and checks expected for changes. Never commit private customer data, credentials, environment folders, or notebook checkpoints. Model changes should preserve the training-only selection and locked holdout method, rerun the notebook, and update the benchmark results here.
 
-## Hypothesis Validation
-
-All five business hypotheses were confirmed before model training:
-
-| Hypothesis | Result |
-|---|---|
-| Churned customers make fewer transactions | Confirmed |
-| High contact frequency predicts churn | Confirmed |
-| Longer inactivity periods predict churn | Confirmed |
-| Declining spend from Q1 to Q4 predicts churn | Confirmed |
-| Lower engagement score predicts churn | Confirmed |
-
----
-
-## Model Results
-
-| Model | Accuracy | F1 Score | AUC | Precision | Recall |
-|---|---|---|---|---|---|
-| Logistic Regression | 82.1% | 0.634 | 0.918 | 0.525 | 0.800 |
-| Random Forest | 94.3% | 0.853 | 0.984 | 0.857 | 0.849 |
-| XGBoost | 96.8% | 0.898 | 0.992 | 0.914 | 0.883 |
-
-XGBoost was selected as the production model based on highest AUC and F1 scores.
-
----
-
-## Techniques Applied
-
-- SMOTE - oversampling to handle 84/16 class imbalance in training data
-- Stratified K-Fold Cross Validation - 5 folds, prevents data leakage
-- GridSearchCV - exhaustive hyperparameter tuning for XGBoost
-- SHAP (SHapley Additive exPlanations) - model explainability for all three models
-- StandardScaler - feature scaling applied consistently across train and test sets
-
----
-
-## Web Application
-
-The Streamlit app provides two tabs:
-
-**Predict Churn**
-
-Enter customer details across three sections — Identity, Profile, and Relationship — along with financial details including credit, transaction data, and utilization ratio. The app returns:
-
-- Churn probability as a percentage
-- Binary prediction - Will Churn or Will Stay
-- Confidence score
-- Risk level - CRITICAL, HIGH, MEDIUM, or LOW
-- Colour-coded probability gauge
-- Actionable business recommendation
-- Risk signals detected from input values
-
-**Model Performance**
-
-Displays model accuracy metrics, a comparison table of all three models, dataset information, and a summary of all techniques applied.
-
----
-
-## How to Run Locally
-
-**Step 1 - Clone the repository**
-
-```bash
-git clone https://github.com/ShreeNathX/Trust-and-Retention-Intelligence.git
-cd fintech-churn-app
-```
-
-**Step 2 - Install dependencies**
-
-```bash
-pip install streamlit pandas numpy joblib scikit-learn xgboost
-```
-
-**Step 3 - Run the pipeline notebook**
-
-Open `Model.ipynb` in Jupyter and run all cells. This generates the three model files inside the `models/` folder.
-
-**Step 4 - Launch the app**
-
-```bash
-streamlit run app.py
-```
-
-The app opens at `http://localhost:8501`
-
----
-
-## How to Deploy on Streamlit Cloud
-
-1. Push the repository to GitHub
-2. Go to share.streamlit.io
-3. Sign in with GitHub
-4. Click New App
-5. Set Repository to `https://github.com/ShreeNathX/Trust-and-Retention-Intelligence`, Branch to `main`, and Main file to `app.py`
-6. Click Deploy
-
----
-
-## Dependencies
-
-```
-streamlit
-pandas
-numpy
-joblib
-scikit-learn
-xgboost
-```
-
-For the notebook only:
-
-```
-matplotlib
-seaborn
-imbalanced-learn
-shap
-```
-
----
-
-## Business Impact
-
-Based on the model performance on the test set, using an assumed annual customer value of INR 15,000 and a retention cost of INR 2,000 per customer:
-
-- The model identifies 88.3% of actual churners
-- Revenue protected per intervention cycle exceeds INR 4,000,000
-- Net business value after retention campaign costs exceeds INR 3,500,000
-
----
-
-## Author
-**Shree Nath Mahato (Leader)**  
-📧 Contact: [shreenath.ventures17@gmail.com](mailto:shreenath.ventures17@gmail.com).<br>
-💬  For any queries, suggestions, or collaborations, feel free to reach out via email.
-
-Built as a portfolio project demonstrating end-to-end data science skills including data engineering, exploratory analysis, machine learning, model explainability, and production deployment.
+There is not yet a project-level `LICENSE` for the source code. The dataset's CC0 status applies to the dataset, not automatically to this repository's code; the project owner should choose a code license before encouraging broad reuse.

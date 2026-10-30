@@ -1,6 +1,10 @@
 __pycache__/
 *.pyc
-.env
-predictions_log.db
+.venv/
+env/
 .ipynb_checkpoints/
+.jupyter_cache/
+.env
+.streamlit/secrets.toml
+predictions_log.db
 .DS_Store
