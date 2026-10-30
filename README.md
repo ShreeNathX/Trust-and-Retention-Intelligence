@@ -2,7 +2,7 @@
 
 A reproducible customer attrition benchmark for the public BankChurners dataset. The Jupyter notebook is the single source for data checks, cleaning, EDA, preprocessing, model training, evaluation, and the model artifact loaded by Streamlit.
 
-**Live app:** [Trust and Retention Intelligence](https://trust-and-retention-intelligence.streamlit.app/)
+**Live app:** [Open the live app](https://trust-and-retention-intelligence.streamlit.app/)
 
 **Status:** research benchmark and demonstration app. The public data contain no observation date, churn-event date, or future prediction horizon. Results do not establish future churn prediction or bank-specific performance.
 

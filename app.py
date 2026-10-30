@@ -13,7 +13,6 @@ SUBGROUP_PATH = ROOT / "outputs" / "subgroup_audit.csv"
 
 st.set_page_config(page_title="Trust and Retention Intelligence", layout="wide")
 st.title("Trust and Retention Intelligence")
-st.markdown("[Open the live app](https://trust-and-retention-intelligence.streamlit.app/)")
 st.caption(
     "Public-data research demo. The source has no observation date or future churn "
     "horizon, so scores are not validated predictions for a real bank."
