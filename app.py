@@ -19,13 +19,18 @@ st.caption(
 )
 
 
-@st.cache_resource
-def load_artifact():
-    return joblib.load(MODEL_PATH)
+def file_signature(path):
+    stat = path.stat()
+    return str(path.resolve()), stat.st_mtime_ns, stat.st_size
 
 
-@st.cache_data
-def load_table(path):
+@st.cache_resource(max_entries=2)
+def load_artifact(path, modified_ns, size_bytes):
+    return joblib.load(path)
+
+
+@st.cache_data(max_entries=20)
+def load_table(path, modified_ns, size_bytes):
     return pd.read_csv(path)
 
 
@@ -35,7 +40,7 @@ if not MODEL_PATH.exists():
     )
     st.stop()
 
-artifact = load_artifact()
+artifact = load_artifact(*file_signature(MODEL_PATH))
 model = artifact["model"]
 threshold = float(artifact["threshold"])
 
@@ -165,7 +170,7 @@ with benchmark_tab:
     )
 
     if BENCHMARK_PATH.exists():
-        benchmark = load_table(BENCHMARK_PATH)
+        benchmark = load_table(*file_signature(BENCHMARK_PATH))
         st.bar_chart(
             benchmark.set_index("model")["holdout_average_precision"],
             y_label="Average precision",
@@ -191,7 +196,7 @@ with benchmark_tab:
         )
     if SUBGROUP_PATH.exists():
         st.dataframe(
-            load_table(SUBGROUP_PATH),
+            load_table(*file_signature(SUBGROUP_PATH)),
             hide_index=True,
             alt="Holdout performance by gender and age audit groups",
         )
