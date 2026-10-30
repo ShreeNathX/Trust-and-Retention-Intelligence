@@ -13,7 +13,7 @@ Issues and pull requests are welcome.
 
 ## Local workflow
 
-1. Install dependencies with `python -m pip install -r requirements.txt`.
+1. Install notebook and development dependencies with `python -m pip install -r requirements-dev.txt`.
 2. Run every cell in `Model.ipynb` from the project folder.
 3. Start the app with `streamlit run app.py` and confirm the scoring and benchmark tabs load.
 4. Summarize changes and any benchmark movement in the pull request.

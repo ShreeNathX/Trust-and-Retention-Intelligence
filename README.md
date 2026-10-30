@@ -100,10 +100,12 @@ The notebook displays the benchmark table and evaluation metrics when run and wr
 
 ## Run the project
 
-Use Python 3.11 with the pinned application and notebook packages:
+Use Python 3.11. Install the notebook and development packages locally:
 
-    python -m pip install -r requirements.txt
+    python -m pip install -r requirements-dev.txt
     jupyter lab
+
+The Streamlit deployment installs only the runtime packages from `requirements.txt`.
 
 From the project folder, open `Model.ipynb` in JupyterLab and run all cells from top to bottom. This fits the benchmark models and saves `models/churn_pipeline.joblib` plus the evaluation reports. Then start the app in a terminal:
 
@@ -120,7 +122,8 @@ Streamlit loads the model and feature schema saved by the notebook. If the artif
 | `Data/BankChurners.csv` | Public static-label benchmark data |
 | `models/churn_pipeline.joblib` | Notebook-produced calibrated model, feature list, threshold, and metrics |
 | `outputs/` | EDA, benchmark, holdout, subgroup, and feature-importance reports |
-| `requirements.txt` | Pinned application and model dependencies |
+| `requirements.txt` | Pinned runtime dependencies for the Streamlit app |
+| `requirements-dev.txt` | Runtime dependencies plus notebook and plotting tools |
 | `CONTRIBUTING.md` | Contribution workflow and review expectations |
 
 The notebook creates `outputs/data_audit.json`, EDA tables and figures, `outputs/benchmark.csv`, `outputs/test_metrics.json`, `outputs/subgroup_audit.csv`, `outputs/feature_importance.csv`, and `outputs/holdout_precision_recall.png`.
